@@ -19,6 +19,7 @@ class Category(models.Model):
         help_text="Leave this blank for an Category Tree", 
         verbose_name='Parent')
     name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=500)
     order = models.IntegerField(blank=True, null=True)
     slug = models.SlugField()
     alternate_title = models.CharField(
@@ -51,8 +52,26 @@ class Category(models.Model):
         ordering = ('tree_id','lft')
 
     def __unicode__(self):
-        ancestors = self.get_ancestors()
-        return ' > '.join([force_unicode(i.name) for i in ancestors]+[self.name,])
+        return self.full_name
+    
+    # overriden to update full_name if necessary
+    def save(self, *args, **kwargs):
+        super(Category, self).save(*args, **kwargs)
+        self.update_name()
+    
+    # method checks if we need to update full_name
+    def update_name(self):
+        sep = ' > '
+        if self.parent is not None:
+            parent_name = self.parent.full_name + sep
+        else:
+            parent_name = ""
+        
+        if parent_name + self.name != self.full_name:
+            self.full_name = parent_name + self.name
+            self.save()
+            for c in self.get_children():
+                c.update_name()
         
 try: mptt.register(Category, order_insertion_by=['name'])
 except: pass

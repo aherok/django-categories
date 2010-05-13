@@ -1,3 +1,9 @@
+Some improvements to original categories app.
+
+1. Added full_name field to hold category name containing ancestors path
+
+--------------------------------------------------------------------------------
+
 This app attempts to provide a generic category system that multiple apps could use. It uses MPTT for the tree storage and provides a custom admin for better visualization (copied and modified from feinCMS).
 
 Goals of the project
